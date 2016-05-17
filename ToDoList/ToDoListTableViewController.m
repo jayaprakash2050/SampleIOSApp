@@ -10,6 +10,7 @@
 #import "ToDoItem.h"
 #import "AddToDoItemViewController.h"
 #import <CoreData/CoreData.h>
+#import "AppDelegate.h"
 
 @interface ToDoListTableViewController ()
 @property NSMutableArray *toDoItems;
@@ -32,6 +33,24 @@
     
 }
 
+-(void) populateData{
+    NSManagedObjectContext *moc = [(AppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"ToDoItem" inManagedObjectContext:moc];
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    [request setEntity:entity];
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"itemName" ascending:YES];
+    NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+    [request setSortDescriptors:sortDescriptors];
+    // Fetch the records and handle an error
+    NSError *error;
+    self.toDoItems = [[moc executeFetchRequest:request error:&error] mutableCopy];
+    if (!self.toDoItems) {
+        // This is a serious error
+        // Handle accordingly
+        NSLog(@"Failed to load colors from disk");
+    }
+    
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -41,8 +60,9 @@
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-    self.toDoItems = [[NSMutableArray alloc] init];
-    [self loadInitialData];
+    //self.toDoItems = [[NSMutableArray alloc] init];
+    //[self loadInitialData];
+    [self populateData];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -121,20 +141,46 @@
 
 - (IBAction)unwindToList:(UIStoryboardSegue *)segue {
     AddToDoItemViewController *source = [segue sourceViewController];
-    ToDoItem *item = source.toDoItem;
-    if(item != nil){
+    NSString *text = source.text;
+    /*if(item != nil){
         [self.toDoItems addObject:item];
         [self.tableView reloadData];
+    }*/
+    NSDate *currentDate = [[NSDate alloc] init];
+
+    
+    NSManagedObjectContext *moc = [(AppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    ToDoItem *newItem = [NSEntityDescription insertNewObjectForEntityForName:@"ToDoItem" inManagedObjectContext:moc];
+    newItem.itemName = text;
+    newItem.completed = NO;
+    newItem.creationDate = currentDate;
+    
+    
+    NSError *error = nil;
+    [moc save: &error];
+    if([moc save: &error] == NO){
+        NSLog(@"Whoops, couldn't save: %@", [error localizedDescription]);
     }
+    
+    [self.toDoItems addObject:newItem];
+    [self.tableView reloadData];
+    
     
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     ToDoItem *tappedItem = [self.toDoItems objectAtIndex:indexPath.row];
     tappedItem.completed = !tappedItem.completed;
     [tableView reloadRowsAtIndexPaths:@[indexPath]
                      withRowAnimation:UITableViewRowAnimationNone];
+    
+    
+    //persist the change
+    NSManagedObjectContext *moc = [(AppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    [moc save:nil];
+    
 }
 
 @end

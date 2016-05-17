@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreData/CoreData.h>
 
-@interface ToDoItem : NSObject
+
+@interface ToDoItem : NSManagedObject
 @property NSString *itemName;
 @property BOOL completed;
-@property (readonly) NSDate *creationDate;
+@property NSDate *creationDate;
 @end

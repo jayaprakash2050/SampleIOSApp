@@ -11,4 +11,5 @@
 
 @interface AddToDoItemViewController : UIViewController
 @property ToDoItem *toDoItem;
+@property NSString *text;
 @end

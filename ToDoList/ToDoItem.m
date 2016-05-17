@@ -9,5 +9,10 @@
 #import "ToDoItem.h"
 
 @implementation ToDoItem
-
+/*@dynamic itemName;
+@dynamic completed;
+@dynamic creationDate;*/
+@synthesize itemName;
+@synthesize completed;
+@synthesize creationDate;
 @end
