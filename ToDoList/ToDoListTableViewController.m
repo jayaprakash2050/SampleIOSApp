@@ -43,7 +43,10 @@
     [request setSortDescriptors:sortDescriptors];
     // Fetch the records and handle an error
     NSError *error;
+    
     self.toDoItems = [[moc executeFetchRequest:request error:&error] mutableCopy];
+    for (ToDoItem *obj in self.toDoItems)
+        NSLog(@"Items: %@", obj.itemName);
     if (!self.toDoItems) {
         // This is a serious error
         // Handle accordingly
@@ -81,12 +84,30 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    /*
+
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ListPrototypeCell" forIndexPath:indexPath];
     
     // Configure the cell...
     ToDoItem *toDoItem = [self.toDoItems objectAtIndex:indexPath.row];
     cell.textLabel.text = toDoItem.itemName;
     if(toDoItem.completed){
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    }
+    else{
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    return cell;*/
+    
+    static NSString *cellID = @"ListPrototypeCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellID];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    }
+    ToDoItem *item = [self.toDoItems objectAtIndex:indexPath.row];
+    cell.textLabel.text = item.itemName;
+    if(item.completed){
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
     }
     else{

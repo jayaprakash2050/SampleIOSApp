@@ -12,7 +12,7 @@
 /*@dynamic itemName;
 @dynamic completed;
 @dynamic creationDate;*/
-@synthesize itemName;
-@synthesize completed;
-@synthesize creationDate;
+@dynamic itemName;
+@dynamic completed;
+@dynamic creationDate;
 @end
