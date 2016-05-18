@@ -16,6 +16,7 @@
 @property NSMutableArray *toDoItems;
 
 @property NSArray *items;
+@property NSInteger *clickedRow;
 @end
 
 @implementation ToDoListTableViewController
@@ -66,6 +67,34 @@
     //self.toDoItems = [[NSMutableArray alloc] init];
     //[self loadInitialData];
     [self populateData];
+    
+    UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc]
+                                          initWithTarget:self action:@selector(handleLongPress:)];
+    lpgr.minimumPressDuration = 0.5; //seconds
+    lpgr.delegate = self;
+    [self.tableView addGestureRecognizer:lpgr];
+    
+    /*UIBarButtonItem *deleteButton = [[UIBarButtonItem alloc]
+                                    initWithTitle:@"Delete"
+                                    style:UIBarButtonItemStyleBordered
+                                    target:self
+                                    action:@selector(deleteAction:)];*/
+    
+    
+}
+
+-(void)deleteAction:(id)sender
+{
+    //printf("deleted");
+    NSManagedObjectContext *moc = [(AppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    ToDoItem *selectedItem = [self.toDoItems objectAtIndex:self.clickedRow];
+    
+
+    [moc deleteObject:selectedItem];
+    [moc save:nil];
+    [self.toDoItems removeObjectAtIndex:self.clickedRow];
+    [self.tableView reloadData];
+    self.navigationItem.leftBarButtonItems = nil;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -186,6 +215,8 @@
     [self.toDoItems addObject:newItem];
     [self.tableView reloadData];
     
+    self.navigationItem.leftBarButtonItems = nil;
+    
     
 }
 
@@ -203,5 +234,31 @@
     [moc save:nil];
     
 }
+
+-(void)handleLongPress:(UILongPressGestureRecognizer *)gestureRecognizer
+{
+    CGPoint p = [gestureRecognizer locationInView:self.tableView];
+    printf("long press");
+    
+    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:p];
+    if (indexPath == nil) {
+        //NSLog(@"long press on table view but not on a row");
+    } else if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        //NSLog(@"long press on table view at row %ld", indexPath.row);
+        self.clickedRow = indexPath.row;
+        UIBarButtonItem *deleteButton = [[UIBarButtonItem alloc]
+                                         initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(deleteAction:)];
+        self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects : deleteButton, nil];
+        
+        
+        
+    } else {
+        NSLog(@"gestureRecognizer.state = %ld", gestureRecognizer.state);
+    }
+}
+/*
+- (IBAction)deleteItems:(id)sender {
+    printf("clicked");
+}*/
 
 @end
