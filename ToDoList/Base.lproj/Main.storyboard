@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--To-Do-List-->
@@ -27,7 +28,7 @@
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <gestureRecognizers/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                             <connections>
                                                 <outletCollection property="gestureRecognizers" destination="UDB-1R-2jH" appends="YES" id="wxp-bd-jSy"/>
@@ -44,11 +45,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="To-Do-List" id="gPp-br-qhy">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="lEL-ia-Ae8">
-                            <connections>
-                                <segue destination="3hj-51-DEb" kind="presentation" id="lYt-iB-Nn8"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="lEL-ia-Ae8">
+                                <connections>
+                                    <segue destination="3hj-51-DEb" kind="presentation" id="lYt-iB-Nn8"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Map" id="Yts-p5-49u">
+                                <connections>
+                                    <action selector="showMap:" destination="Dna-hJ-dGX" id="CQf-dg-giO"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kbl-Jr-ZHo" userLabel="First Responder" sceneMemberID="firstResponder"/>

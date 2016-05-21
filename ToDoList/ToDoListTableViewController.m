@@ -12,14 +12,27 @@
 #import <CoreData/CoreData.h>
 #import "AppDelegate.h"
 
+@import GoogleMaps;
+
+
 @interface ToDoListTableViewController ()
 @property NSMutableArray *toDoItems;
 
 @property NSArray *items;
 @property NSInteger *clickedRow;
+
+@property (nonatomic,retain) CLLocationManager *locationManager;
+
+@property CLLocationDegrees latitude;
+@property CLLocationDegrees longitude;
+
 @end
 
 @implementation ToDoListTableViewController
+GMSMapView *mapView_;
+UITableView *tView;
+
+
 //Load some hardcoded data initially
 - (void) loadInitialData{
     ToDoItem *item1 = [[ToDoItem alloc] init];
@@ -79,8 +92,23 @@
                                     style:UIBarButtonItemStyleBordered
                                     target:self
                                     action:@selector(deleteAction:)];*/
+    self.locationManager = [[CLLocationManager alloc] init];
+    self.locationManager.delegate = self;
+    [self.locationManager requestWhenInUseAuthorization];
+
+    self.locationManager.distanceFilter = kCLDistanceFilterNone;
+    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    [self.locationManager startUpdatingLocation];
+    self.latitude = self.locationManager.location.coordinate.latitude;
+    self.longitude = self.locationManager.location.coordinate.longitude;
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    NSLog(@"OldLocation %f %f", oldLocation.coordinate.latitude, oldLocation.coordinate.longitude);
+    NSLog(@"NewLocation %f %f", newLocation.coordinate.latitude, newLocation.coordinate.longitude);
     
-    
+    self.latitude = newLocation.coordinate.latitude;
+    self.longitude = newLocation.coordinate.longitude;
 }
 
 -(void)deleteAction:(id)sender
@@ -192,6 +220,7 @@
 - (IBAction)unwindToList:(UIStoryboardSegue *)segue {
     AddToDoItemViewController *source = [segue sourceViewController];
     NSString *text = source.text;
+    if(text != nil){
     /*if(item != nil){
         [self.toDoItems addObject:item];
         [self.tableView reloadData];
@@ -216,7 +245,7 @@
     [self.tableView reloadData];
     
     self.navigationItem.leftBarButtonItems = nil;
-    
+    }
     
 }
 
@@ -260,5 +289,49 @@
 - (IBAction)deleteItems:(id)sender {
     printf("clicked");
 }*/
+- (IBAction)showMap:(id)sender {
+    NSLog(@"Location is %f %f", self.latitude, self.longitude);
+    // Create a GMSCameraPosition that tells the map to display the
+    // coordinate -33.86,151.20 at zoom level 6.
+    GMSCameraPosition *camera = [GMSCameraPosition cameraWithLatitude:self.latitude
+                                                            longitude:self.longitude
+                                                                 zoom:6];
+    mapView_ = [GMSMapView mapWithFrame:CGRectZero camera:camera];
+    mapView_.myLocationEnabled = YES;
+    tView = self.tableView;
+    self.view = mapView_;
+    //[self.view addSubview:mapView_];
+    //[self.view bringSubviewToFront:mapView_];
+    
+    //[self.view insertSubview:mapView_ aboveSubview:self.tableView];
+    
+    // Creates a marker in the center of the map.
+    
+    
+    
+    
+    GMSMarker *marker = [[GMSMarker alloc] init];
+    //marker.position = CLLocationCoordinate2DMake(-33.86, 151.20);
+    marker.position = CLLocationCoordinate2DMake(self.latitude,self.longitude);
+    marker.title = @"Tempe";
+    marker.snippet = @"UnitedStates";
+    marker.map = mapView_;
+    
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
+                                     initWithBarButtonSystemItem:UIBarButtonSystemItemRewind target:self action:@selector(backAction:)];
+    self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects : backButton, nil];
+    
+    
+}
+
+-(void)backAction:(id)sender{
+    //[mapView_ removeFromSuperview];
+    self.view = tView;
+    //[self.view bringSubviewToFront:self.tableView];
+    //[self.view addSubview:self.tableView];
+    [self.tableView reloadData];
+    
+    self.navigationItem.leftBarButtonItems = nil;
+}
 
 @end
